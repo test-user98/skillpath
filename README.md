@@ -1,9 +1,10 @@
 # Skillpath — courses section
 
+**Live page: https://skillpath-jai.framer.website**
+
 Framer code components for the Skillpath landing page. All data comes live
 from the assignment API, nothing is hardcoded.
 
-- Live page: https://skillpath-jai.framer.website
 - [CourseSection.tsx](CourseSection.tsx) — the courses section (the part the assignment is about)
 - [Hero.tsx](Hero.tsx), [Footer.tsx](Footer.tsx) — the sections around it
 
