@@ -4,13 +4,17 @@ import { addPropertyControls, ControlType } from "framer"
  * @framerSupportedLayoutWidth any-prefer-fixed
  * @framerSupportedLayoutHeight auto
  */
-export default function Hero(props: {
-    headline: string
-    subline: string
-    buttonText: string
+export default function Hero({
+    headline = "Learn skills that actually pay off",
+    subline = "Practical, project-based courses built by people who do the work.",
+    buttonText = "Browse courses",
+    style,
+}: {
+    headline?: string
+    subline?: string
+    buttonText?: string
     style?: React.CSSProperties
 }) {
-    const { headline, subline, buttonText, style } = props
     return (
         <section
             style={{
@@ -82,10 +86,3 @@ addPropertyControls(Hero, {
         defaultValue: "Browse courses",
     },
 })
-
-Hero.defaultProps = {
-    headline: "Learn skills that actually pay off",
-    subline:
-        "Practical, project-based courses built by people who do the work.",
-    buttonText: "Browse courses",
-}

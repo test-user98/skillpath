@@ -1,67 +1,32 @@
 # Skillpath — courses section
 
-A Framer code component that renders the courses grid for the Skillpath
-landing page. All data comes live from the assignment API — nothing is
-hardcoded.
+Framer code components for the Skillpath landing page. All data comes live
+from the assignment API, nothing is hardcoded.
 
 - Live page: https://skillpath-jai.framer.website
-- Courses section: [CourseSection.tsx](CourseSection.tsx) — this is the component the assignment is about
-- Hero and footer: [Hero.tsx](Hero.tsx), [Footer.tsx](Footer.tsx) — small code components for the parts around it
+- [CourseSection.tsx](CourseSection.tsx) — the courses section (the part the assignment is about)
+- [Hero.tsx](Hero.tsx), [Footer.tsx](Footer.tsx) — the sections around it
 
-Formatting note: these files are exactly what lives in the Framer project
-(Framer runs Prettier on save, so line wrapping follows its defaults).
+## How the flaky API is handled
 
-## How it deals with the flaky API
-
-The API fails roughly 1 in 3 requests, and in bursts. So:
-
-- Every request goes through `fetchWithRetry`: up to 3 GET attempts with a
-  growing pause between them (0.6s, then 1.2s), so retries don't all land
-  inside the same bad window.
-- The two endpoints are fetched in parallel with `Promise.allSettled`, so a
-  failed country lookup can never take down the course grid.
-- If the country call fails but courses load, the grid still renders with
-  USD prices and a small note saying so. Hiding good data over a failed
-  region lookup felt like the wrong product call.
-- If the course call itself fails after all retries, there's a friendly
-  error message and a "Try again" button (no raw errors, no blank page).
-
-## The four states
-
-1. **Loading** — pulsing skeleton cards.
-2. **Error** — message + retry button.
-3. **Empty** — "No courses are available right now." (also a separate
-   message when a search matches nothing).
-4. **Ready** — the grid.
+- Every request retries up to 3 times with growing delays, because the
+  failures come in bursts.
+- The two endpoints are fetched with `Promise.allSettled`, so a failed
+  country lookup never hides the courses — they render in USD with a
+  small note instead.
+- Four states: skeleton loading, error with a retry button, empty, grid.
 
 ## Currency
 
-Prices arrive in the smallest unit: `pricePaise` (paise) and
-`priceUsdCents` (cents). Both are divided by 100 and formatted with
-`Intl.NumberFormat`, which also gets Indian digit grouping right:
-199900 paise → **₹1,999** (not ₹1,99,900), 3999 cents → **$39.99**.
-Whole amounts drop the decimals.
+Prices arrive in the smallest unit (`pricePaise`, `priceUsdCents`). Both
+are divided by 100 and formatted with `Intl.NumberFormat`:
+199900 paise → ₹1,999, 3999 cents → $39.99.
 
-## Property controls
+## Layout and controls
 
-- **Heading** — the section title text.
-- **Accent** — the color used for the category tag and the retry button.
+3 columns on desktop, 2 under 1024px, 1 under 640px — the grid doesn't
+care how many cards come back. Property controls: **Heading** (section
+title) and **Accent** (tag + button color).
 
-## Layout
-
-CSS grid: 3 columns on desktop, 2 under 1024px, 1 under 640px. The grid
-doesn't care how many cards come back, so an uneven last row is fine.
-
-## Extras included
-
-Search box (name + category), sort by price (in the currency being shown),
-skeleton loaders, retry button, and a "Refundable" badge that only shows
-when `refundable` is true.
-
-## Using it in Framer
-
-1. In Framer: **Assets → Code → Create code file**, name it
-   `CourseSection`, replace the contents with this file.
-2. Drag the component onto the page between the hero and footer, set its
-   width to fill.
-3. Heading and accent color are editable from the properties panel.
+Extras: search, sort by price, skeleton loaders, retry button, and a
+"Refundable" badge that only shows when it's true.

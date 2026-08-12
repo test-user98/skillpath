@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react"
 import { addPropertyControls, ControlType } from "framer"
 
-// Assignment API. It fails on purpose (~1 in 3 requests),
-// so every call goes through fetchWithRetry instead of a plain fetch.
+// This API fails ~1 in 3 requests on purpose, so every call retries.
 const API_BASE = "https://syncsphere-hiv6.onrender.com"
 const FETCH_ATTEMPTS = 3
 
@@ -21,7 +20,6 @@ interface Course {
 
 type CountryCode = "IN" | "US"
 
-// GET a URL and parse the JSON, retrying because the API fails randomly.
 async function fetchWithRetry(url: string): Promise<any> {
     let lastError: unknown
     for (let attempt = 1; attempt <= FETCH_ATTEMPTS; attempt++) {
@@ -34,7 +32,7 @@ async function fetchWithRetry(url: string): Promise<any> {
         } catch (error) {
             lastError = error
             if (attempt < FETCH_ATTEMPTS) {
-                // the API fails in short bursts, so wait a bit longer each try
+                // failures come in bursts, so wait a bit longer each try
                 await new Promise((resolve) =>
                     setTimeout(resolve, 600 * attempt)
                 )
@@ -44,8 +42,7 @@ async function fetchWithRetry(url: string): Promise<any> {
     throw lastError
 }
 
-// Prices come in the smallest unit (paise / cents), so divide by 100.
-// Whole amounts drop the decimals (₹1,999, $40), others keep two (₹1,499.50).
+// Prices arrive in paise / cents, so divide by 100 before formatting.
 function formatPrice(course: Course, country: CountryCode): string {
     const isIndia = country === "IN"
     const amount = (isIndia ? course.pricePaise : course.priceUsdCents) / 100
@@ -79,7 +76,6 @@ function CourseCard(props: {
     )
 }
 
-// Grey placeholder cards shown while the data loads.
 function SkeletonGrid() {
     return (
         <div className="sp-grid">
@@ -106,13 +102,15 @@ function SkeletonGrid() {
  * @framerSupportedLayoutWidth any-prefer-fixed
  * @framerSupportedLayoutHeight auto
  */
-export default function CourseSection(props: {
-    heading: string
-    accentColor: string
+export default function CourseSection({
+    heading = "Popular courses",
+    accentColor = "#4F46E5",
+    style,
+}: {
+    heading?: string
+    accentColor?: string
     style?: React.CSSProperties
 }) {
-    const { heading, accentColor, style } = props
-
     const [status, setStatus] = useState<"loading" | "error" | "ready">(
         "loading"
     )
@@ -120,24 +118,21 @@ export default function CourseSection(props: {
     const [country, setCountry] = useState<CountryCode | null>(null)
     const [search, setSearch] = useState("")
     const [sortOrder, setSortOrder] = useState("default")
-    // bumping this re-runs the effect below, used by the retry button
-    const [reloadCount, setReloadCount] = useState(0)
+    const [retryCount, setRetryCount] = useState(0)
 
     useEffect(() => {
         let cancelled = false
         setStatus("loading")
 
         async function load() {
-            // Both requests run in parallel. allSettled (not all) because
-            // a failed country lookup should not take the whole section down.
+            // allSettled, not all: a failed country lookup should not
+            // take the courses down with it.
             const [courseResult, countryResult] = await Promise.allSettled([
                 fetchWithRetry(API_BASE + "/assignment/course-data"),
                 fetchWithRetry(API_BASE + "/assignment/country-code"),
             ])
             if (cancelled) return
 
-            // Without course data there is nothing to show, so this is
-            // the only case that becomes a real error state.
             if (courseResult.status === "rejected") {
                 setStatus("error")
                 return
@@ -146,8 +141,7 @@ export default function CourseSection(props: {
                 Array.isArray(courseResult.value) ? courseResult.value : []
             )
 
-            // Product call: if we can't detect the country we still show
-            // the courses, priced in USD, with a small note (country = null).
+            // Unknown country: keep the courses, price in USD, show a note.
             const code =
                 countryResult.status === "fulfilled"
                     ? countryResult.value.country_code
@@ -160,12 +154,10 @@ export default function CourseSection(props: {
         return () => {
             cancelled = true
         }
-    }, [reloadCount])
+    }, [retryCount])
 
-    // USD is the fallback when the country is unknown.
     const displayCountry: CountryCode = country ?? "US"
 
-    // Search and sort are applied on top of whatever the API returned.
     let visibleCourses = courses
     const query = search.trim().toLowerCase()
     if (query) {
@@ -236,7 +228,7 @@ export default function CourseSection(props: {
                         <button
                             className="sp-retry"
                             style={{ background: accentColor }}
-                            onClick={() => setReloadCount(reloadCount + 1)}
+                            onClick={() => setRetryCount(retryCount + 1)}
                         >
                             Try again
                         </button>
@@ -287,11 +279,6 @@ addPropertyControls(CourseSection, {
         defaultValue: "#4F46E5",
     },
 })
-
-CourseSection.defaultProps = {
-    heading: "Popular courses",
-    accentColor: "#4F46E5",
-}
 
 const styles = `
 .sp-section {
