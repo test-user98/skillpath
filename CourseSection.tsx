@@ -35,7 +35,9 @@ async function fetchWithRetry(url: string): Promise<any> {
             lastError = error
             if (attempt < FETCH_ATTEMPTS) {
                 // the API fails in short bursts, so wait a bit longer each try
-                await new Promise((resolve) => setTimeout(resolve, 600 * attempt))
+                await new Promise((resolve) =>
+                    setTimeout(resolve, 600 * attempt)
+                )
             }
         }
     }
@@ -84,10 +86,16 @@ function SkeletonGrid() {
             {[1, 2, 3, 4, 5, 6].map((n) => (
                 <div className="sp-card" key={n}>
                     <div className="sp-skeleton" style={{ width: "40%" }} />
-                    <div className="sp-skeleton" style={{ width: "80%", height: 20 }} />
+                    <div
+                        className="sp-skeleton"
+                        style={{ width: "80%", height: 20 }}
+                    />
                     <div className="sp-skeleton" style={{ width: "100%" }} />
                     <div className="sp-skeleton" style={{ width: "90%" }} />
-                    <div className="sp-skeleton" style={{ width: "30%", height: 20 }} />
+                    <div
+                        className="sp-skeleton"
+                        style={{ width: "30%", height: 20 }}
+                    />
                 </div>
             ))}
         </div>
@@ -105,7 +113,9 @@ export default function CourseSection(props: {
 }) {
     const { heading, accentColor, style } = props
 
-    const [status, setStatus] = useState<"loading" | "error" | "ready">("loading")
+    const [status, setStatus] = useState<"loading" | "error" | "ready">(
+        "loading"
+    )
     const [courses, setCourses] = useState<Course[]>([])
     const [country, setCountry] = useState<CountryCode | null>(null)
     const [search, setSearch] = useState("")
@@ -132,7 +142,9 @@ export default function CourseSection(props: {
                 setStatus("error")
                 return
             }
-            setCourses(Array.isArray(courseResult.value) ? courseResult.value : [])
+            setCourses(
+                Array.isArray(courseResult.value) ? courseResult.value : []
+            )
 
             // Product call: if we can't detect the country we still show
             // the courses, priced in USD, with a small note (country = null).
@@ -164,7 +176,8 @@ export default function CourseSection(props: {
         )
     }
     if (sortOrder !== "default") {
-        const priceKey = displayCountry === "IN" ? "pricePaise" : "priceUsdCents"
+        const priceKey =
+            displayCountry === "IN" ? "pricePaise" : "priceUsdCents"
         visibleCourses = [...visibleCourses].sort((a, b) =>
             sortOrder === "low-high"
                 ? a[priceKey] - b[priceKey]
@@ -173,7 +186,11 @@ export default function CourseSection(props: {
     }
 
     return (
-        <section className="sp-section" style={{ ...style, width: "100%" }}>
+        <section
+            id="courses"
+            className="sp-section"
+            style={{ ...style, width: "100%" }}
+        >
             <style>{styles}</style>
             <div className="sp-inner">
                 <div className="sp-header">
@@ -193,8 +210,12 @@ export default function CourseSection(props: {
                                 onChange={(e) => setSortOrder(e.target.value)}
                             >
                                 <option value="default">Featured</option>
-                                <option value="low-high">Price: low to high</option>
-                                <option value="high-low">Price: high to low</option>
+                                <option value="low-high">
+                                    Price: low to high
+                                </option>
+                                <option value="high-low">
+                                    Price: high to low
+                                </option>
                             </select>
                         </div>
                     )}
@@ -202,7 +223,8 @@ export default function CourseSection(props: {
 
                 {status === "ready" && country === null && (
                     <p className="sp-note">
-                        We couldn't detect your region, so prices are shown in USD.
+                        We couldn't detect your region, so prices are shown in
+                        USD.
                     </p>
                 )}
 
@@ -223,13 +245,18 @@ export default function CourseSection(props: {
 
                 {status === "ready" && courses.length === 0 && (
                     <p className="sp-message">
-                        No courses are available right now. Please check back soon.
+                        No courses are available right now. Please check back
+                        soon.
                     </p>
                 )}
 
-                {status === "ready" && courses.length > 0 && visibleCourses.length === 0 && (
-                    <p className="sp-message">No courses match your search.</p>
-                )}
+                {status === "ready" &&
+                    courses.length > 0 &&
+                    visibleCourses.length === 0 && (
+                        <p className="sp-message">
+                            No courses match your search.
+                        </p>
+                    )}
 
                 {status === "ready" && visibleCourses.length > 0 && (
                     <div className="sp-grid">

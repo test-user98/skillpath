@@ -4,8 +4,12 @@ A Framer code component that renders the courses grid for the Skillpath
 landing page. All data comes live from the assignment API — nothing is
 hardcoded.
 
-- Live page: `<framer link here>`
-- Component: [CourseSection.tsx](CourseSection.tsx) (single file, paste-ready for Framer)
+- Live page: https://skillpath-jai.framer.website
+- Courses section: [CourseSection.tsx](CourseSection.tsx) — this is the component the assignment is about
+- Hero and footer: [Hero.tsx](Hero.tsx), [Footer.tsx](Footer.tsx) — small code components for the parts around it
+
+Formatting note: these files are exactly what lives in the Framer project
+(Framer runs Prettier on save, so line wrapping follows its defaults).
 
 ## How it deals with the flaky API
 
